@@ -11,28 +11,31 @@ left out.
 
 - Next.js App Router, plain JavaScript (no TypeScript)
 - Leaflet + Leaflet.heat for the map (pins / point heat map / zone overview)
-- Vercel KV for persistence, with an automatic in-memory fallback for local dev
+- Upstash Redis (via Vercel Marketplace) for persistence, with an automatic in-memory fallback for local dev
 - Canvas-generated mock "captured photos" (no external image hosting)
 
 ## Project structure
 
 ```
 /app
-  /login/page.js            login screen
-  /dashboard/page.js        main dashboard (server-side cookie check)
-  /api/login/route.js       POST: validate credentials, set session cookie
-  /api/logout/route.js      POST: clear session cookie
-  /api/reports/route.js     GET: list reports · POST: create one (used by Simulate)
-  /api/reports/[id]/route.js  PATCH: update a report's status
-  globals.css                shared civic styling
+  /login/page.js             login screen
+  /(protected)/layout.js      auth check + shared header/left rail (wraps both pages below)
+  /(protected)/dashboard/page.js  live map/list dashboard
+  /(protected)/archive/page.js    searchable/sortable reports archive table
+  /api/login/route.js        POST: validate credentials, set session cookie
+  /api/logout/route.js       POST: clear session cookie
+  /api/reports/route.js      GET: list reports · POST: create one (used by Simulate)
+  /api/reports/[id]/route.js   PATCH: update a report's status (also appends to its history)
+  globals.css                 shared civic styling
 /lib
-  store.js                   data access layer (Vercel KV + in-memory fallback)
-  zones.js                   zone polygon definitions + point-in-zone logic
-  mockImage.js                canvas-based mock photo generator (client-side)
+  store.js                    data access layer (Upstash Redis + in-memory fallback)
+  zones.js                    zone polygon definitions + point-in-zone logic
+  mockImage.js                 canvas-based mock photo generator (client-side)
   constants.js, format.js
 /components
-  Dashboard.js, Header.js, StatsStrip.js, MapView.js,
-  ReportList.js, DetailPanel.js, ZoneLegend.js, LoginForm.js, Seal.js
+  ReportsProvider.js, DashboardView.js, ArchiveView.js, Header.js, LeftRail.js,
+  StatsStrip.js, StatusFilter.js, RegionFilter.js, MapView.js, ReportList.js,
+  DetailPanel.js, StatusHistory.js, ZoneLegend.js, ZoneTooltip.js, LoginForm.js, Seal.js
 ```
 
 ## Running locally (zero cloud setup)
@@ -47,12 +50,12 @@ Open [http://localhost:3000](http://localhost:3000) — you'll land on `/login`.
 **Demo credentials:** `admin` / `admin123` (also shown on the login screen itself).
 
 No environment variables are required for local development. `lib/store.js`
-checks for `KV_REST_API_URL` / `KV_REST_API_TOKEN` and, if they're not set,
-transparently falls back to an in-memory report list that's seeded with 12
-mock reports on first read. That list resets whenever the dev server
-restarts — that's expected for local dev.
+checks for `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` and, if
+they're not set, transparently falls back to an in-memory report list
+that's seeded with 12 mock reports on first read. That list resets
+whenever the dev server restarts — that's expected for local dev.
 
-If you do want to test against a real KV store locally, copy
+If you do want to test against real Redis locally, copy
 `.env.local.example` to `.env.local` and fill in the values from your
 Vercel project's Storage tab.
 
@@ -60,12 +63,13 @@ Vercel project's Storage tab.
 
 1. Push this repo to GitHub and import it into Vercel (New Project → your repo).
    No build configuration is needed — it's a standard Next.js app.
-2. In the Vercel dashboard, go to **Storage → Create Database → KV**, then
-   **Connect Project** to attach it to this project. This automatically
-   injects `KV_REST_API_URL`, `KV_REST_API_TOKEN`, etc. as environment
+2. In the Vercel dashboard, go to **Storage → Marketplace Database Providers
+   → Upstash** (Redis), create a store, then **Connect Project** to attach
+   it to this project. This automatically injects
+   `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` as environment
    variables for your deployments — no manual copying needed.
-3. Deploy. The app seeds the KV store with mock reports on its first read,
-   and every "Simulate Incoming Alert" / status-update write persists there —
+3. Deploy. The app seeds Redis with mock reports on its first read, and
+   every "Simulate Incoming Alert" / status-update write persists there —
    so anyone opening the deployed URL (a judge on their own phone, for
    example) sees the same data as your laptop, live.
 
