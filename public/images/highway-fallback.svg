@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fa3bb" />
+      <stop offset="100%" stop-color="#5b7390" />
+    </linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6b7480" />
+      <stop offset="100%" stop-color="#3f454d" />
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="900" fill="url(#sky)" />
+
+  <!-- distant haze band -->
+  <rect x="0" y="430" width="1600" height="60" fill="#7d93ad" opacity="0.5" />
+
+  <!-- road surface, converging toward a vanishing point -->
+  <polygon points="0,900 1600,900 980,440 620,440" fill="url(#road)" />
+
+  <!-- lane divider lines converging to the vanishing point -->
+  <g stroke="#e7d98f" stroke-width="10" opacity="0.55">
+    <line x1="300" y1="900" x2="760" y2="455" />
+    <line x1="1300" y1="900" x2="840" y2="455" />
+  </g>
+  <g stroke="#e9edf2" stroke-width="6" opacity="0.45" stroke-dasharray="26 34">
+    <line x1="800" y1="900" x2="800" y2="440" />
+  </g>
+
+  <!-- simple overpass / bridge silhouette crossing the foreground -->
+  <g fill="#2f3842" opacity="0.88">
+    <rect x="0" y="560" width="1600" height="46" />
+    <rect x="120" y="606" width="60" height="140" />
+    <rect x="1420" y="606" width="60" height="140" />
+    <rect x="740" y="606" width="60" height="140" />
+    <path d="M 0 560 Q 800 470 1600 560 L 1600 606 L 0 606 Z" />
+  </g>
+
+  <!-- roadside light posts, receding -->
+  <g fill="#2f3842" opacity="0.7">
+    <rect x="610" y="455" width="5" height="40" />
+    <rect x="990" y="455" width="5" height="40" />
+    <rect x="470" y="700" width="9" height="70" />
+    <rect x="1120" y="700" width="9" height="70" />
+  </g>
+</svg>
